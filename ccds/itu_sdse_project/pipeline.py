@@ -4,8 +4,6 @@ from loguru import logger
 from pathlib import Path
 import joblib
 import mlflow
-from pathlib import Path
-from loguru import logger
 
 from itu_sdse_project.config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 from itu_sdse_project.modeling.loaders import load_raw_data, pull_dvc_data
