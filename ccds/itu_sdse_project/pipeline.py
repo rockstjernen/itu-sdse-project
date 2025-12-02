@@ -3,10 +3,11 @@
 from loguru import logger
 from pathlib import Path
 import joblib
-import mlflow
+# import mlflow
 
 from itu_sdse_project.config import RAW_DATA_DIR, PROCESSED_DATA_DIR
 from itu_sdse_project.modeling.loaders import load_raw_data, pull_dvc_data
+from itu_sdse_project.modeling.cleaners import clean_raw_data
 
 
 def train():
@@ -29,8 +30,7 @@ def train():
     
     # 2. Clean data
     logger.info("Step 2: Cleaning data...")
-    # Cleaning goes here
-    df_cleaned = df  # Placeholder for cleaned data
+    df_cleaned = clean_raw_data(df)
     
     # 3. Transform features
     logger.info("Step 3: Transforming features...")
