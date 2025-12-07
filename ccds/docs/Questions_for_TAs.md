@@ -23,4 +23,33 @@ A: We had issues, getting `dvc pull` to work but this routine seems to do the tr
 
 ---
 
+### Q: Im not sure about the deployment.
+I remember Jeppe showed us something called github workflow. But i cat find that thing on github. Unless youre talking about github actions.  
+Is there some hints or descriptions on how the deployment should look?
 
+A:
+
+Follow up question: My githup repo has actions disabled because it was forked from some repo with actions anabled. how do i fix?
+
+---
+
+### Q: What functionality is expeced from the final deployment?
+1) train
+2) inference
+3) other?
+
+A: 
+
+---
+
+### Q: Are we suppose to use ML flow for this project?
+
+A:
+
+---
+
+### Q: Should we have a venv folder on the github and run the same venv?
+
+A:
+
+---
