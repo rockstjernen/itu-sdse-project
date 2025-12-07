@@ -30,5 +30,3 @@ jobs:
 
       - name: Validate model
         uses: lasselundstenjensen/itu-sdse-project-model-validator@main
-        with:
-          model-path: ./model.pkl
