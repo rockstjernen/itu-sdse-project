@@ -3,3 +3,20 @@
 # files
 .DS_Store
 */.DS_Store
+
+# Ignore MLflow runs and pipeline artifacts
+mlruns/
+
+# Processed data artifacts produced by the pipeline
+ccds/data/processed/artifacts/
+
+# Persisted models, pickles and joblib outputs produced at runtime
+*.pkl
+*.joblib
+*.json.gz
+
+# Logs and temporary files
+*.log
+
+# VSCode workspace settings
+.vscode/

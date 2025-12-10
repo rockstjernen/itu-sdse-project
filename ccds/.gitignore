@@ -189,3 +189,22 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Local runtime artifacts and model outputs (keep source tracked)
+# MLflow tracking/experiment runs
+mlruns/
+
+# Processed data artifacts produced by the pipeline
+data/processed/artifacts/
+
+# Persisted models, pickles and joblib outputs produced at runtime
+*.pkl
+*.joblib
+*.json.gz
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# VSCode workspace settings
+.vscode/
