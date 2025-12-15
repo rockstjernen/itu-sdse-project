@@ -4,6 +4,9 @@
 .DS_Store
 */.DS_Store
 
+# Data files (tracked by DVC)
+*.csv
+
 # Ignore MLflow runs and pipeline artifacts
 mlruns/
 

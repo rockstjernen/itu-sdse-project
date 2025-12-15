@@ -21,7 +21,7 @@ func (m *ItuSdseProject) Train(ctx context.Context, source *dagger.Directory, gi
 		WithExec([]string{"git", "config", "user.email", "ci@example.com"}).
 		WithExec([]string{"git", "config", "user.name", "CI"}).
 		// Pull data with DVC
-		WithExec([]string{"dvc", "pull", "-v"})
+		WithExec([]string{"dvc", "pull"})
 
 	// Run the pipeline
 	trained := container.WithExec([]string{"python", "-m", "itu_sdse_project.pipeline"})
