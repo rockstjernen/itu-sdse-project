@@ -16,10 +16,11 @@ func (m *ItuSdseProject) Train(ctx context.Context, source *dagger.Directory, gi
 		}).
 		WithSecretVariable("GITHUB_TOKEN", githubToken).
 		WithExec([]string{"sh", "-c", "git config --global url.\"https://${GITHUB_TOKEN}@github.com/\".insteadOf \"https://github.com/\""}).
-		// Debug: show DVC config and try pull with verbose output
-		WithExec([]string{"cat", ".dvc/config"}).
-		WithExec([]string{"ls", "-la", "data/raw/"}).
-		WithExec([]string{"cat", "data/raw/raw_data.csv.dvc"}).
+		// Initialize git repo (required for DVC)
+		WithExec([]string{"git", "init"}).
+		WithExec([]string{"git", "config", "user.email", "ci@example.com"}).
+		WithExec([]string{"git", "config", "user.name", "CI"}).
+		// Pull data with DVC
 		WithExec([]string{"dvc", "pull", "-v"})
 
 	// Run the pipeline
