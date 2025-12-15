@@ -12,11 +12,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the package
 COPY itu_sdse_project/ ./itu_sdse_project/
 
+# Copy DVC config and data pointers
+COPY .dvc/ ./.dvc/
+COPY data/ ./data/
+
 # Create models directory
 RUN mkdir -p models
-
-# Run the dummy pipeline
-# CMD ["python", "-m", "itu_sdse_project.pipeline_dummy"]
 
 # Run the pipeline
 CMD ["python", "-m", "itu_sdse_project.pipeline"]
