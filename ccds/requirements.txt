@@ -15,4 +15,5 @@ tqdm
 typer
 xgboost
 mlflow
+dvc
 #-e .
