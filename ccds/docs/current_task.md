@@ -1,26 +1,13 @@
-organise helper files
+To Do:
 
+Docker Tidying (train_dummy.dockerfile) - Aney
+Dagger Tidying (/dagger/main.go) - Aney
 
-docker actions
-dagger files
-- Mikkel
+Github Workflow (train.yml) - Alex
 
+Pickle - How to retrieve latest artifact before docker instance terminates? - Aney
 
-segment jupyter file
+Optional question:
+What role did mlflow play in original notebook? - All
+Do we still need it in our automated workflow? - All
 
-refactoring python code
-
-    loading & cleaning data
-    - Aske
-
-
-    model training ##ml flow
-    - Alex
-
-
-    register best model
-    
-
-
-
-github actions
