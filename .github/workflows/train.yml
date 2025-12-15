@@ -19,10 +19,10 @@ jobs:
           sudo mv bin/dagger /usr/local/bin/
 
       - name: Run Dagger pipeline
-        # Added github-token to enable DVC to pull data from GitHub
         run: |
+          cp -r .dvc ./ccds/.dvc
           dagger call train --source=./ccds --github-token=env:DVC_GITHUB_TOKEN --output=./model.pkl
-        env:   
+        env:
           DVC_GITHUB_TOKEN: ${{ secrets.DVC_GITHUB_TOKEN }}
 
       - name: Upload model artifact
