@@ -304,27 +304,24 @@ def train():
     logger.success("Training pipeline completed.")
 
 # Prediction and model loading utilities.
-
-def load_scaler(scaler_path: Path):
-    """Load saved scaler from disk."""
-    logger.info(f"Loading scaler from {scaler_path}")
+# Unutilised code for loading a pre-built model and scaler for inference.
+# def load_scaler(scaler_path: Path):
+    # """Load saved scaler from disk."""
+    # logger.info(f"Loading scaler from {scaler_path}")
     # TODO: Use joblib.load() to load scaler
-    pass
+    # pass
 
-
-def load_model(model_name: str = "lead_model", stage: str = "Production"):
-    """Load model from MLflow registry."""
-    logger.info(f"Loading model: {model_name} (stage: {stage})")
+# def load_model(model_name: str = "lead_model", stage: str = "Production"):
+    # """Load model from MLflow registry."""
+    # logger.info(f"Loading model: {model_name} (stage: {stage})")
     # TODO: Use mlflow.pyfunc.load_model() or load from file
-    pass
+    # pass
 
-
-def load_model_from_file(model_path: Path):
-    """Load model from saved file."""
-    logger.info(f"Loading model from {model_path}")
+# def load_model_from_file(model_path: Path):
+    # """Load model from saved file."""
+    # logger.info(f"Loading model from {model_path}")
     # TODO: Load XGBoost or pickle model from file
-    pass
-
+    # pass
 
 if __name__ == "__main__":
     train()
