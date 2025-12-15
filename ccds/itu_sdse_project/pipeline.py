@@ -6,6 +6,7 @@ import joblib
 import json
 import datetime
 import os
+import shutil
 
 import pandas as pd
 import numpy as np
@@ -13,6 +14,8 @@ import numpy as np
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report, accuracy_score, f1_score
+
+from itu_sdse_project.config import MODELS_DIR
 
 try:
     import mlflow
@@ -302,6 +305,24 @@ def train():
             logger.error(f"Model registration failed: {exc}")
 
     logger.success("Training pipeline completed.")
+
+    # Copy best model to models/model.pkl for the validator
+    
+    MODELS_DIR.mkdir(parents=True, exist_ok=True)
+    final_model_path = MODELS_DIR / "model.pkl"
+    
+    if best_model_path:
+        if best_model_path.endswith(".pkl"):
+            shutil.copy(best_model_path, final_model_path)
+        else:
+            # For XGBoost JSON, load and re-save as pickle
+            best_xgb = XGBRFClassifier()
+            best_xgb.load_model(best_model_path)
+            joblib.dump(best_xgb, final_model_path)
+        logger.info(f"Copied best model to {final_model_path}")
+
+    logger.success("Training pipeline completed.")
+
 
 # Prediction and model loading utilities.
 # Unutilised code for loading a pre-built model and scaler for inference.
