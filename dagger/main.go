@@ -15,7 +15,12 @@ func (m *ItuSdseProject) Train(ctx context.Context, source *dagger.Directory, gi
 			Dockerfile: "train.dockerfile",
 		}).
 		WithSecretVariable("GITHUB_TOKEN", githubToken).
-		WithExec([]string{"sh", "-c", "git config --global url.\"https://${GITHUB_TOKEN}@github.com/\".insteadOf \"https://github.com/\""})
+		WithExec([]string{"sh", "-c", "git config --global url.\"https://${GITHUB_TOKEN}@github.com/\".insteadOf \"https://github.com/\""}).
+		// Debug: show DVC config and try pull with verbose output
+		WithExec([]string{"cat", ".dvc/config"}).
+		WithExec([]string{"ls", "-la", "data/raw/"}).
+		WithExec([]string{"cat", "data/raw/raw_data.csv.dvc"}).
+		WithExec([]string{"dvc", "pull", "-v"})
 
 	// Run the pipeline
 	trained := container.WithExec([]string{"python", "-m", "itu_sdse_project.pipeline"})
