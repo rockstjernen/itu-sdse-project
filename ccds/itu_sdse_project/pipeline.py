@@ -36,18 +36,19 @@ from itu_sdse_project.modeling.cleaners import clean_raw_data
 
 def train():
     """
-    Complete training pipeline:
+    Training pipeline:
     - Load data 
     - Process data
     - Train models
     - Evaluate and select best model
     - Register model
     """
+
     logger.info("=" * 50)
     logger.info("Starting TRAINING pipeline...")
     logger.info("=" * 50)
     
-    # 1. Load + Clean data
+    #1 Load & Clean data
     logger.info("Step 1: Loading data...")
     pull_dvc_data()
     df = load_raw_data(RAW_DATA_DIR / "raw_data.csv")
@@ -55,7 +56,7 @@ def train():
     logger.info("Step 2: Cleaning data...")
     df_cleaned = clean_raw_data(df)
 
-    # 2. Load gold dataset produced by cleaner
+    #2 Load gold dataset produced by cleaner
     artifacts_dir = PROCESSED_DATA_DIR / "artifacts"
     gold_path = artifacts_dir / "train_data_gold.csv"
     if not gold_path.exists():
@@ -65,9 +66,10 @@ def train():
         logger.info(f"Loading gold dataset from {gold_path}")
         data = pd.read_csv(gold_path)
 
-    # 3. Feature engineering / dummies
+    #3 Feature engineering / dummies
     logger.info("Step 3: Feature engineering (dummies / types)...")
-    # drop columns not used for training if present
+
+    #Drop columns not used for training if present
     for c in ["lead_id", "customer_code", "date_part"]:
         if c in data.columns:
             data = data.drop(c, axis=1)
@@ -88,7 +90,7 @@ def train():
 
     data_prepared = pd.concat([other_df, cat_df], axis=1)
 
-    # ensure floats
+    #Ensure floats
     for col in data_prepared.columns:
         try:
             data_prepared[col] = data_prepared[col].astype("float64")
@@ -96,7 +98,7 @@ def train():
             # leave as-is (e.g., target column)
             pass
 
-    # 4. Split
+    #4 Split
     logger.info("Step 4: Splitting train/test...")
     if "lead_indicator" not in data_prepared.columns:
         raise RuntimeError("Target column 'lead_indicator' not found in prepared data")
@@ -108,20 +110,20 @@ def train():
         X, y, random_state=42, test_size=0.15, stratify=y
     )
 
-    # Save processed splits
+    #Save processed splits
     artifacts_dir.mkdir(parents=True, exist_ok=True)
     X_train.to_csv(artifacts_dir / "X_train.csv", index=False)
     X_test.to_csv(artifacts_dir / "X_test.csv", index=False)
     y_train.to_csv(artifacts_dir / "y_train.csv", index=False)
     y_test.to_csv(artifacts_dir / "y_test.csv", index=False)
 
-    # 5. Train candidate models
+    #5 Train candidate models
     logger.info("Step 5: Training candidate models...")
     model_results: dict = {}
-    # Keep track of which models were logged to MLflow: {model_path: {run_id, artifact_path}}
+    # Keep track of which models being logged to MLflow: {model_path: {run_id, artifact_path}}
     logged_models: dict[str, dict] = {}
 
-    # Experiment name for MLflow (shared for all models)
+    #Experiment name for MLflow (shared with all models)
     experiment_name = datetime.datetime.now().strftime("%Y_%B_%d")
     experiment_id = None
     if MLFLOW_AVAILABLE:
@@ -132,7 +134,7 @@ def train():
         except Exception:
             logger.warning("Failed to set MLflow experiment; continuing without MLflow experiment id")
 
-    # 5a. XGBoost randomized search
+    #5A XGBoost randomized search
     try:
         xgb = XGBRFClassifier(random_state=42, use_label_encoder=False)
         params_xgb = {
@@ -152,7 +154,7 @@ def train():
         xgb_path = artifacts_dir / "lead_model_xgboost.json"
         xgb_search.best_estimator_.save_model(str(xgb_path))
 
-        # If MLflow is available, attempt to log this model and metrics so it can be registered later
+        #If MLflow is available, attempt to log this model and metrics so it can be registered later
         if MLFLOW_AVAILABLE:
             try:
                 import importlib
@@ -176,7 +178,7 @@ def train():
     except Exception as exc:
         logger.error(f"XGBoost training failed: {exc}")
 
-    # 5b. Logistic Regression with RandomizedSearchCV + mlflow logging
+    #5B Logistic Regression with RandomizedSearchCV + mlflow logging
     try:
         if MLFLOW_AVAILABLE:
             try:
@@ -200,7 +202,7 @@ def train():
         lr_path = artifacts_dir / "lead_model_lr.pkl"
         joblib.dump(value=lr_search.best_estimator_, filename=str(lr_path))
 
-        # Optionally log with mlflow
+        #Optional mlflow logging
         if MLFLOW_AVAILABLE:
             try:
                 import importlib
@@ -217,7 +219,7 @@ def train():
                     except Exception:
                         logger.warning("Failed to log basic LR metrics/artifacts to MLflow")
 
-                    # log a python model wrapper for probability predictions
+                    #Log python model wrapper for probability predictions
                     class LRWrapper(mlflow_pyfunc.PythonModel):
                         def __init__(self, model):
                             self.model = model
@@ -225,7 +227,7 @@ def train():
                         def predict(self, context, model_input):
                             return self.model.predict_proba(model_input)[:, 1]
 
-                    # log the pyfunc model under artifact path 'model'
+                    #Log pyfunc model under artifact path 'model'
                     try:
                         mlflow_pyfunc.log_model("model", python_model=LRWrapper(lr_search.best_estimator_), registered_model_name=None)
                         logged_models[str(lr_path)] = {"run_id": run.info.run_id, "artifact_path": "model"}
@@ -239,7 +241,7 @@ def train():
     except Exception as exc:
         logger.error(f"Logistic regression training failed: {exc}")
 
-    # 6. Save results and select best model
+    #6 Save results & select best model
     logger.info("Step 6: Saving model results and selecting best model...")
     results_path = artifacts_dir / "model_results.json"
     with open(results_path, "w+") as f:
@@ -249,7 +251,7 @@ def train():
     with open(cols_path, "w+") as f:
         json.dump({"column_names": list(X_train.columns)}, f)
 
-    # Determine best model by weighted avg f1-score
+    #Determine best model by weighted avg f1-score
     best_model_path = None
     best_f1 = -1.0
     for model_path, report in model_results.items():
@@ -262,20 +264,20 @@ def train():
 
     logger.info(f"Best model: {best_model_path} with weighted f1 {best_f1}")
 
-    # Optionally register with MLflow if available and an mlflow run exists
+    #Optionally register with MLflow if available and an mlflow run exists
     if MLFLOW_AVAILABLE and best_model_path is not None:
         try:
             model_name = "lead_model"
             client = MlflowClient()
 
-            # If we logged the model during training, retrieve its run_id and artifact_path
+            #If model logged during training, retrieve run_id and artifact_path
             info = logged_models.get(best_model_path)
             if info:
                 model_uri = f"runs:/{info['run_id']}/{info['artifact_path']}"
                 logger.info(f"Registering model from {model_uri} to MLflow model registry as '{model_name}'")
                 model_details = mlflow.register_model(model_uri=model_uri, name=model_name)
 
-                # wait until the model version is READY
+                #Wait until the model version is READY
                 def wait_until_ready(name, version, timeout=60):
                     start = time.time()
                     while time.time() - start < timeout:
@@ -289,7 +291,7 @@ def train():
                 version = model_details.version
                 ready = wait_until_ready(model_details.name, version)
                 if ready:
-                    # Transition to Production, archive other versions
+                    #Transition to Production, archive other versions
                     client.transition_model_version_stage(
                         name=model_details.name,
                         version=version,
@@ -306,7 +308,7 @@ def train():
 
     logger.success("Training pipeline completed.")
 
-    # Copy best model to models/model.pkl for the validator
+    #Copy best model to models/model.pkl for the validator
     
     MODELS_DIR.mkdir(parents=True, exist_ok=True)
     final_model_path = MODELS_DIR / "model.pkl"
@@ -315,7 +317,7 @@ def train():
         if best_model_path.endswith(".pkl"):
             shutil.copy(best_model_path, final_model_path)
         else:
-            # For XGBoost JSON, load and re-save as pickle
+            #For XGBoost JSON, load and re-save as pickle
             best_xgb = XGBRFClassifier()
             best_xgb.load_model(best_model_path)
             joblib.dump(best_xgb, final_model_path)
@@ -324,25 +326,28 @@ def train():
     logger.success("Training pipeline completed.")
 
 
-# Prediction and model loading utilities.
+#Prediction and model loading utilities.
 # Unutilised code for loading a pre-built model and scaler for inference.
-# def load_scaler(scaler_path: Path):
-    # """Load saved scaler from disk."""
-    # logger.info(f"Loading scaler from {scaler_path}")
-    # TODO: Use joblib.load() to load scaler
-    # pass
+"""
+def load_scaler(scaler_path: Path):
+    #Load saved scaler from disk.
+    logger.info(f"Loading scaler from {scaler_path}")
+    #Use joblib.load() to load scaler
+    pass
 
-# def load_model(model_name: str = "lead_model", stage: str = "Production"):
-    # """Load model from MLflow registry."""
-    # logger.info(f"Loading model: {model_name} (stage: {stage})")
-    # TODO: Use mlflow.pyfunc.load_model() or load from file
-    # pass
+def load_model(model_name: str = "lead_model", stage: str = "Production"):
+    #Load model from MLflow registry.
+    logger.info(f"Loading model: {model_name} (stage: {stage})")
+    #Use mlflow.pyfunc.load_model() or load from file
+    pass
 
-# def load_model_from_file(model_path: Path):
-    # """Load model from saved file."""
-    # logger.info(f"Loading model from {model_path}")
-    # TODO: Load XGBoost or pickle model from file
-    # pass
+def load_model_from_file(model_path: Path):
+    #Load model from saved file.
+    logger.info(f"Loading model from {model_path}")
+    #Load XGBoost or pickle model from file
+    pass
+"""
+
 
 if __name__ == "__main__":
     train()
