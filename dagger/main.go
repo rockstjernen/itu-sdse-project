@@ -7,9 +7,9 @@ import (
 
 type ItuSdseProject struct{}
 
-// Train builds the container and runs the training pipeline, returning the model file
+// Train function builds the container and runs the training pipeline - Then returns the model file
 func (m *ItuSdseProject) Train(ctx context.Context, source *dagger.Directory, githubToken *dagger.Secret) *dagger.File {
-	// Build container from source directory using our Dockerfile
+	// Build <<
 	container := dag.Container().
 		Build(source, dagger.ContainerBuildOpts{
 			Dockerfile: "train.dockerfile",
