@@ -1,5 +1,12 @@
 # Data Science in Production: MLOps and Software Engineering (Autumn 2025) Exam Project - Rawdockers
 
+#### Group members
+- Aske Neye — [@askeneye](https://github.com/askeneye)  
+- Alex Soo — [@datvoidcat](https://github.com/datvoidcat)  
+- Mikkel Hansen — [@Mikkel-Hacker](https://github.com/Mikkel-Hacker)  
+
+---   
+
 This repository contains the solution for the Data Science in Production: MLOps and Software Engineering Exam Project. The project creates a machine learning pipeline that processes user behavior data to identify potential new customers.
 
 The solution has been refactored from the provided monolithic Jupyter Notebook into a standardized MLOps project structure, utilizing Dagger for pipeline orchestration and GitHub Actions for CI/CD automation.
